@@ -1,0 +1,8 @@
+{
+    "editor.autoClosingBrackets": "languageDefined",
+    "editor.autoClosingDelete": "auto",
+    "editor.autoIndent": "none",
+    "editor.language.brackets": [
+
+    ]
+}
