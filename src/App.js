@@ -3,16 +3,16 @@ import React, { useEffect, useState } from "react"
 import Article from "./Articles";
 import Menu from "./Menu";
 
-
 const App = () => {
 
     const [news, setNews] = useState([])
-    let request = "all"
+    let request = [{ key: "all", value: "all" }]
 
     const socket = new WebSocket("ws://localhost:3001");
 
-    function getData() {
-
+    function getData(request) {
+        const jsonRequest = JSON.stringify(request)
+        socket.send(jsonRequest)
         socket.addEventListener("message", (event) => {
             const data = JSON.parse(event.data);
             console.log("Received data from server:", data);
@@ -21,16 +21,18 @@ const App = () => {
     }
 
     function handleChange(e) {
-        request = e.target.value
-        socket.send(request)
-        getData()
+        if (e.target.id === "source") {
+            request = [{ key: "one_source", value: e.target.value }]
+        } else if (e.target.id === "category") {
+            request = [{ key: "category", value: e.target.value }]
+        }
+        getData(request)
     };
 
 
     useEffect(() => {
-        socket.onopen = () => socket.send(request)
-        getData()
-    }, [request])
+        socket.onopen = () => getData(request)
+    }, [])
 
     return (
         <div className="bg-white py-10 sm:py-15">
