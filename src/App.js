@@ -2,52 +2,50 @@ import "./App.css";
 import React, { useEffect, useState } from "react"
 import Article from "./Articles";
 import Menu from "./Menu";
-import axios from "axios";
 
 
 const App = () => {
 
     const [news, setNews] = useState([])
+    let request = "all"
 
-    const baseURL = "https://newsapi.org/v2"
+    const socket = new WebSocket("ws://localhost:3001");
 
-    const keyApi = '3ae6c7ef47764a919093ed68658ba917'
+    function getData() {
 
-    let request = `everything?q=keyword`
-
-    function getData(request) {
-        return axios.get(`${baseURL}/${request}&apiKey=${keyApi}`).then((response) => {
-            setNews(response.data.articles)
-        })
     }
 
-    function handleClick(e) {
-
-        let value = e.currentTarget.id
-
-        request = (value !== "all") ? `top-headlines?category=${value}` : `everything?q=keyword`
-
-        getData(request)
-
+    function handleChange(e) {
+        let value = e.target.value
+        socket.send(value)
+        socket.addEventListener("message", (event) => {
+            const data = JSON.parse(event.data);
+            console.log("Received data from server:", data);
+            setNews(data.articles)
+        });
     };
 
+
     useEffect(() => {
-        getData(request)
+        socket.onopen = () => socket.send(request);
+        socket.addEventListener("message", (event) => {
+            const data = JSON.parse(event.data);
+            console.log("Received data from server:", data);
+            setNews(data.articles)
+        });
+
     }, [request])
 
-
     return (
-
         <div className="bg-white py-10 sm:py-15">
             <div className="mx-auto max-w-7xl px-2 lg:px-5">
                 <div className="mx-auto max-w-2xl lg:mx-0">
                     <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Recent news !</h2>
-                    <Menu handleClick={handleClick} />
+                    <Menu handleChange={handleChange} />
                 </div>
                 <Article news={news} />
             </div>
         </div>
-
     );
 }
 

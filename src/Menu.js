@@ -1,15 +1,30 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 
-function Menu({ handleClick }) {
 
-    var menuItems = ['all', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology']
+function Menu({ handleChange }) {
+
+    const [source, setSources] = useState([])
+
+    useEffect(() => {
+        const socket = new WebSocket("ws://localhost:3001");
+        socket.onopen = () => socket.send('sources');
+        socket.addEventListener("message", (event) => {
+            const data = JSON.parse(event.data);
+            console.log("Received data from server:", data);
+            setSources(data.sources)
+        });
+    }, [])
 
 
     return (
         <div className="flex-auto mb-5 my-20">
-            {menuItems.map((item, index) => (
-                <button key={index} onClick={handleClick} className="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800" id={item}>{item}</button>
-            ))}
+            <label for="source" class="block mb-2 text-md font-medium text-black-900 dark:text-black-400">Sources :</label>
+            <select onChange={handleChange} id="source" class="bg-white-50 border border-white-300 text-white-900 text-md rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white-700 dark:border-white-600 dark:placeholder-white-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option value="all">All</option>
+                {source.map((item, index) => (
+                    <option key={index} value={item.id}>{item.name}</option>
+                ))}
+            </select>
         </div>
     );
 }
