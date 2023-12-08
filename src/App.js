@@ -13,27 +13,23 @@ const App = () => {
 
     function getData() {
 
-    }
-
-    function handleChange(e) {
-        let value = e.target.value
-        socket.send(value)
         socket.addEventListener("message", (event) => {
             const data = JSON.parse(event.data);
             console.log("Received data from server:", data);
             setNews(data.articles)
         });
+    }
+
+    function handleChange(e) {
+        request = e.target.value
+        socket.send(request)
+        getData()
     };
 
 
     useEffect(() => {
-        socket.onopen = () => socket.send(request);
-        socket.addEventListener("message", (event) => {
-            const data = JSON.parse(event.data);
-            console.log("Received data from server:", data);
-            setNews(data.articles)
-        });
-
+        socket.onopen = () => socket.send(request)
+        getData()
     }, [request])
 
     return (
